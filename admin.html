@@ -11,6 +11,7 @@
 <body class="bg-slate-100 min-h-screen text-slate-800">
   <div class="max-w-7xl mx-auto p-4 md:p-6">
     
+    <!-- Thanh tiêu đề -->
     <header class="flex flex-wrap justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 gap-4">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl shadow-md">
@@ -22,15 +23,15 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="exportCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition shadow-sm">
-          <i class="fa-solid fa-download mr-1.5"></i> Xuất Excel
+        <button id="exportBtn" onclick="exportCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition shadow-sm flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> <span>Xuất Excel</span>
         </button>
       </div>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- Cột Cấu Hình -->
+      <!-- Cột trái: Cấu hình trình chiếu -->
       <div class="lg:col-span-4 space-y-5">
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 class="font-bold text-slate-900 flex items-center gap-2">
@@ -39,7 +40,7 @@
 
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">TÊN MÔN HỌC / BUỔI HỌC</label>
-            <input type="text" id="sessionName" value="Lập Trình Web - Ca 01" 
+            <input type="text" id="sessionName" value="Sinh Hoạt Công Dân-1" 
               class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500">
           </div>
 
@@ -50,7 +51,7 @@
                 class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-indigo-500">
               <button onclick="applyHost()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold">Lưu</button>
             </div>
-            <p class="text-[11px] text-slate-400 mt-1">Tự động nhận diện domain Render / Cloudflare hoặc IP LAN.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Tự động nhận diện Render / Cloudflare / Ngrok hoặc IP LAN.</p>
           </div>
 
           <!-- Đổi mã QR 2s - 5s - 15s - 20s -->
@@ -70,7 +71,7 @@
             </p>
           </div>
 
-          <!-- ĐỘ PHỨC TẠP CỦA QR -->
+          <!-- Độ phức tạp của QR (Mật độ điểm ảnh) -->
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-semibold text-slate-600">ĐỘ PHỨC TẠP QR (MẬT ĐỘ Ô)</label>
@@ -86,7 +87,7 @@
             </div>
           </div>
 
-          <!-- KÍCH THƯỚC MÀN CHIẾU -->
+          <!-- Kích thước hiển thị khung hình -->
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-semibold text-slate-600">KÍCH THƯỚC KHUNG HÌNH (PX)</label>
@@ -106,6 +107,7 @@
           </div>
         </div>
 
+        <!-- Thẻ thống kê tổng số lượng -->
         <div class="bg-indigo-600 text-white p-5 rounded-2xl shadow-md flex items-center justify-between">
           <div>
             <p class="text-xs text-indigo-200 font-medium">ĐÃ ĐIỂM DANH THÀNH CÔNG</p>
@@ -117,13 +119,13 @@
         </div>
       </div>
 
-      <!-- Cột Trình Chiếu QR -->
+      <!-- Cột phải: Màn hình chiếu QR & Danh sách -->
       <div class="lg:col-span-8 space-y-6">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center text-center">
           <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold mb-2">
             <i class="fa-solid fa-camera"></i> HƯỚNG CAMERA ĐIỆN THOẠI ĐỂ ĐIỂM DANH
           </div>
-          <h2 id="sessionHeading" class="text-2xl font-black text-slate-900 mb-4">Lập Trình Web - Ca 01</h2>
+          <h2 id="sessionHeading" class="text-2xl font-black text-slate-900 mb-4">Sinh Hoạt Công Dân-1</h2>
 
           <div class="w-full max-w-sm h-1.5 bg-slate-100 rounded-full overflow-hidden mb-6">
             <div id="countdownBar" class="h-full bg-indigo-600 transition-all duration-300" style="width: 100%;"></div>
@@ -151,7 +153,7 @@
           </div>
         </div>
 
-        <!-- Bảng danh sách trực tiếp -->
+        <!-- Bảng danh sách vừa điểm danh -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
           <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
             <i class="fa-solid fa-list-check text-indigo-600"></i> Danh Sách Vừa Điểm Danh
@@ -196,6 +198,7 @@
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Tự động lấy domain từ thanh địa chỉ (đặc biệt khi chạy trên Render/Cloudflare)
       if (window.location.host && !window.location.host.includes('localhost') && !window.location.host.includes('127.0.0.1')) {
         currentHost = window.location.host;
       } else {
@@ -214,9 +217,10 @@
       });
 
       refreshQrNow();
-      initSSE();
+      initRealtime();
     });
 
+    // Lấy Token mới từ server
     async function refreshQrNow() {
       try {
         const res = await fetch('/api/token?duration=60');
@@ -232,6 +236,7 @@
       }
     }
 
+    // Vẽ mã QR ra màn hình
     function renderQR() {
       const box = document.getElementById('qrcodeBox');
       box.innerHTML = '';
@@ -257,6 +262,7 @@
       });
     }
 
+    // Đếm ngược chu kỳ đổi QR
     function startTimer() {
       clearInterval(timer);
       secondsLeft = intervalSec;
@@ -292,7 +298,7 @@
     function changeComplexity(val) {
       complexityLevel = parseInt(val);
       const labels = {
-        1: 'Rất thưa (Ô to - Dễ quét nhất)',
+        1: 'Thấp (Ô To - Dễ Quét)',
         2: 'Vừa phải',
         3: 'Dày đặc',
         4: 'Rất dày (Mật độ cao)'
@@ -312,7 +318,7 @@
       if (val) {
         currentHost = val.replace(/^https?:\/\//, '');
         renderQR();
-        alert('Đã cập nhật Host mới!');
+        alert('Đã cập nhật Domain/Host mới!');
       }
     }
 
@@ -322,18 +328,20 @@
       btn.innerHTML = isPaused ? '<i class="fa-solid fa-play mr-1"></i> Tiếp tục' : '<i class="fa-solid fa-pause mr-1"></i> Tạm dừng';
     }
 
-    function initSSE() {
-      const evt = new EventSource('/api/events');
-      evt.onmessage = (e) => {
-        try {
-          records = JSON.parse(e.data);
-          updateAttendanceUI(records);
-        } catch (err) {
-          console.error(err);
-        }
-      };
+    // Đồng bộ danh sách Realtime (SSE + Polling dự phòng)
+    function initRealtime() {
+      // 1. Kênh SSE
+      try {
+        const evt = new EventSource('/api/events');
+        evt.onmessage = (e) => {
+          try {
+            records = JSON.parse(e.data);
+            updateAttendanceUI(records);
+          } catch (err) {}
+        };
+      } catch (e) {}
 
-      // Dự phòng: Kéo dữ liệu từ /api/list mỗi 3 giây nếu mạng chặn SSE
+      // 2. Kênh Polling dự phòng mỗi 3 giây (đảm bảo không bị nghẽn buffer trên Render/Cloudflare)
       setInterval(async () => {
         try {
           const res = await fetch('/api/list');
@@ -342,7 +350,7 @@
             records = data;
             updateAttendanceUI(records);
           }
-        } catch(e) {}
+        } catch (e) {}
       }, 3000);
     }
 
@@ -363,42 +371,54 @@
       `).join('');
     }
 
-    // HÀM XUẤT EXCEL / CSV CHUẨN UTF-8
-    function exportCSV() {
-      if (!records || records.length === 0) {
-        alert('Chưa có dữ liệu sinh viên điểm danh để xuất file!');
-        return;
+    // XUẤT FILE EXCEL / CSV CHUẨN UTF-8 (KÉO DỮ LIỆU TỰ ĐỘNG TỪ SERVER)
+    async function exportCSV() {
+      const btn = document.getElementById('exportBtn');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang tải...</span>';
+
+      try {
+        // Luôn kéo dữ liệu tươi mới nhất từ endpoint /api/list
+        const res = await fetch('/api/list');
+        if (!res.ok) throw new Error('Không thể kết nối đến máy chủ');
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+          alert('Chưa có dữ liệu sinh viên nào điểm danh để xuất file!');
+          btn.innerHTML = originalHTML;
+          return;
+        }
+
+        const sessionTitle = document.getElementById('sessionName').value.trim() || 'DiemDanh';
+
+        // Thêm Byte Order Mark (\uFEFF) để Excel hiển thị đúng tiếng Việt có dấu
+        let csvContent = "\uFEFFSTT,Mã Sinh Viên,Họ và Tên,Lớp / Phòng,Thời Gian Điểm Danh\n";
+
+        data.forEach((r, idx) => {
+          const time = r.timestamp ? new Date(r.timestamp).toLocaleString('vi-VN') : '';
+          const mssv = (r.studentId || '').replace(/"/g, '""');
+          const name = (r.fullName || '').replace(/"/g, '""');
+          const className = (r.className || '').replace(/"/g, '""');
+          csvContent += `${idx + 1},"${mssv}","${name}","${className}","${time}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        link.href = downloadUrl;
+        link.download = `${sessionTitle}_${dateStr}.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+      } catch (err) {
+        alert('Lỗi xuất file: ' + err.message);
+      } finally {
+        btn.innerHTML = originalHTML;
       }
-
-      const sessionTitle = document.getElementById('sessionName').value.trim() || 'DiemDanh';
-      
-      // \uFEFF là BOM (Byte Order Mark) để Microsoft Excel nhận diện chuẩn tiếng Việt UTF-8 có dấu
-      let csvContent = "\uFEFFSTT,Mã Sinh Viên,Họ và Tên,Lớp / Phòng,Thời Gian Điểm Danh\n";
-
-      records.forEach((r, idx) => {
-        const timeFormatted = r.timestamp ? new Date(r.timestamp).toLocaleString('vi-VN') : '';
-        const row = [
-          idx + 1,
-          `"${(r.studentId || '').replace(/"/g, '""')}"`,
-          `"${(r.fullName || '').replace(/"/g, '""')}"`,
-          `"${(r.className || '').replace(/"/g, '""')}"`,
-          `"${timeFormatted}"`
-        ];
-        csvContent += row.join(",") + "\n";
-      });
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      
-      const dateStr = new Date().toISOString().slice(0, 10);
-      link.href = downloadUrl;
-      link.download = `${sessionTitle}_${dateStr}.csv`;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
     }
   </script>
 </body>
