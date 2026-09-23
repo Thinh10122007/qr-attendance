@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="exportCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition">
+        <button onclick="exportCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition shadow-sm">
           <i class="fa-solid fa-download mr-1.5"></i> Xuất Excel
         </button>
       </div>
@@ -50,7 +50,7 @@
                 class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-indigo-500">
               <button onclick="applyHost()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold">Lưu</button>
             </div>
-            <p class="text-[11px] text-slate-400 mt-1">Tự động nhận diện link Cloudflare / Ngrok hoặc IP LAN.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Tự động nhận diện domain Render / Cloudflare hoặc IP LAN.</p>
           </div>
 
           <!-- Đổi mã QR 2s - 5s - 15s - 20s -->
@@ -70,7 +70,7 @@
             </p>
           </div>
 
-          <!-- ĐỘ PHỨC TẠP CỦA QR (Mật độ điểm ảnh) -->
+          <!-- ĐỘ PHỨC TẠP CỦA QR -->
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-semibold text-slate-600">ĐỘ PHỨC TẠP QR (MẬT ĐỘ Ô)</label>
@@ -179,25 +179,23 @@
 
   <script>
     let currentToken = '';
-    let intervalSec = 5; // Mặc định đổi QR mỗi 5s
+    let intervalSec = 5;
     let secondsLeft = 5;
     let timer = null;
     let isPaused = false;
-    let qrDisplaySize = 340; // Kích thước hiển thị khung hình (px)
-    let complexityLevel = 1; // Độ phức tạp (1: Thấp - ô to, 4: Rất dày)
+    let qrDisplaySize = 340;
+    let complexityLevel = 1;
     let currentHost = '';
     let records = [];
 
-    // Bản đồ mức độ sửa lỗi để điều khiển độ phức tạp của QR
     const correctionLevels = {
-      1: QRCode.CorrectLevel.L, // Ít điểm ảnh nhất, ô vuông to nhất, dễ quét
+      1: QRCode.CorrectLevel.L,
       2: QRCode.CorrectLevel.M,
       3: QRCode.CorrectLevel.Q,
-      4: QRCode.CorrectLevel.H  // Mật độ điểm dày đặc nhất
+      4: QRCode.CorrectLevel.H
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Tự động nhận diện host: Nếu đang chạy trên Cloudflare/Ngrok thì lấy luôn host đó
       if (window.location.host && !window.location.host.includes('localhost') && !window.location.host.includes('127.0.0.1')) {
         currentHost = window.location.host;
       } else {
@@ -219,7 +217,6 @@
       initSSE();
     });
 
-    // Lấy token mới từ server (Token sống 60s)
     async function refreshQrNow() {
       try {
         const res = await fetch('/api/token?duration=60');
@@ -240,11 +237,8 @@
       box.innerHTML = '';
       
       const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-      
-      // Thêm chuỗi salt ngẫu nhiên ngắn để mỗi lần đổi chu kỳ (2s/5s) hình ảnh QR sẽ biến đổi hoàn toàn
       const salt = Math.random().toString(36).substring(2, 5);
       
-      // Độ phức tạp: cấp càng cao thì bù thêm padding để hạt QR dày đặc hơn
       let padding = '';
       if (complexityLevel === 2) padding = '&d=1';
       if (complexityLevel === 3) padding = '&density_mode=medium_complex';
@@ -272,7 +266,6 @@
         secondsLeft--;
         updateUI();
         if (secondsLeft <= 0) {
-          // Khi hết chu kỳ (ví dụ 2s, 5s), tạo QR mới nhưng Token vẫn hợp lệ 60s
           refreshQrNow();
         }
       }, 1000);
@@ -286,7 +279,6 @@
       bar.className = pct < 30 ? 'h-full bg-rose-500 transition-all duration-300' : 'h-full bg-indigo-600 transition-all duration-300';
     }
 
-    // Chọn chu kỳ đổi QR: 2s, 5s, 15s, 20s
     function setIntervalSec(s) {
       intervalSec = s;
       document.getElementById('intervalBadge').textContent = `${s}s`;
@@ -297,7 +289,6 @@
       refreshQrNow();
     }
 
-    // Điều chỉnh độ phức tạp (Mật độ hạt QR)
     function changeComplexity(val) {
       complexityLevel = parseInt(val);
       const labels = {
@@ -310,7 +301,6 @@
       renderQR();
     }
 
-    // Điều chỉnh kích thước hiển thị khung hình máy chiếu (px)
     function changeSize(v) {
       qrDisplaySize = parseInt(v);
       document.getElementById('sizeBadge').textContent = `${qrDisplaySize}px`;
@@ -333,7 +323,6 @@
     }
 
     function initSSE() {
-      // 1. Dùng SSE Realtime
       const evt = new EventSource('/api/events');
       evt.onmessage = (e) => {
         try {
@@ -344,25 +333,23 @@
         }
       };
 
-      // 2. Dự phòng: Tự động tải lại danh sách mỗi 2 giây phòng khi mạng lag/Cloudflare chặn SSE
+      // Dự phòng: Kéo dữ liệu từ /api/list mỗi 3 giây nếu mạng chặn SSE
       setInterval(async () => {
         try {
-          const res = await fetch('/api/events');
+          const res = await fetch('/api/list');
+          if (res.ok) {
+            const data = await res.json();
+            records = data;
+            updateAttendanceUI(records);
+          }
         } catch(e) {}
-      }, 2000);
-    }
-
-    // Tách riêng hàm cập nhật bảng để dùng chung
-    async function fetchAttendanceList() {
-      try {
-        const res = await fetch('/api/token'); // Trigger hoặc viết 1 endpoint trả list
-      } catch (e) {}
+      }, 3000);
     }
 
     function updateAttendanceUI(recordsList) {
       document.getElementById('totalCount').textContent = recordsList.length;
       const tbody = document.getElementById('attendanceTbody');
-      if (recordsList.length === 0) {
+      if (!recordsList || recordsList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400">Chưa có lượt điểm danh nào.</td></tr>`;
         return;
       }
@@ -374,6 +361,44 @@
           <td class="py-2 px-3 text-slate-600">${r.className}</td>
         </tr>
       `).join('');
+    }
+
+    // HÀM XUẤT EXCEL / CSV CHUẨN UTF-8
+    function exportCSV() {
+      if (!records || records.length === 0) {
+        alert('Chưa có dữ liệu sinh viên điểm danh để xuất file!');
+        return;
+      }
+
+      const sessionTitle = document.getElementById('sessionName').value.trim() || 'DiemDanh';
+      
+      // \uFEFF là BOM (Byte Order Mark) để Microsoft Excel nhận diện chuẩn tiếng Việt UTF-8 có dấu
+      let csvContent = "\uFEFFSTT,Mã Sinh Viên,Họ và Tên,Lớp / Phòng,Thời Gian Điểm Danh\n";
+
+      records.forEach((r, idx) => {
+        const timeFormatted = r.timestamp ? new Date(r.timestamp).toLocaleString('vi-VN') : '';
+        const row = [
+          idx + 1,
+          `"${(r.studentId || '').replace(/"/g, '""')}"`,
+          `"${(r.fullName || '').replace(/"/g, '""')}"`,
+          `"${(r.className || '').replace(/"/g, '""')}"`,
+          `"${timeFormatted}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.href = downloadUrl;
+      link.download = `${sessionTitle}_${dateStr}.csv`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
     }
   </script>
 </body>
