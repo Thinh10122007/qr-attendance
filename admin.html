@@ -7,32 +7,33 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .toast-anim { transition: transform 0.25s ease-out, opacity 0.25s ease-out; }
+    #qrcodeBox canvas, #qrcodeBox img { max-width: 100% !important; height: auto !important; }
+  </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
-  <div class="max-w-7xl mx-auto p-4 md:p-6">
+  <div class="max-w-[1600px] mx-auto p-4 md:p-6">
     
-    <!-- Thanh tiêu đề -->
-    <header class="flex flex-wrap justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl shadow-md">
-          <i class="fa-solid fa-qrcode"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold text-slate-900 leading-tight">Màn Chiếu Điểm Danh QR</h1>
-          <p class="text-xs text-slate-500">QR đổi nhanh liên tục — Token sống 60 giây an toàn</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <button id="exportBtn" onclick="exportCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition shadow-sm flex items-center gap-2">
-          <i class="fa-solid fa-download"></i> <span>Xuất Excel</span>
-        </button>
-      </div>
-    </header>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       
-      <!-- Cột trái: Cấu hình trình chiếu -->
-      <div class="lg:col-span-4 space-y-5">
+      <!-- Cột 1: Thống Kê & Cấu Hình Trình Chiếu (Bên Trái) -->
+      <div class="lg:col-span-4 xl:col-span-3 space-y-5">
+        
+        <!-- Thẻ thống kê tổng số lượng -->
+        <div class="bg-indigo-600 text-white p-5 rounded-2xl shadow-md flex items-center justify-between">
+          <div>
+            <p class="text-xs text-indigo-200 font-medium">ĐÃ ĐIỂM DANH THÀNH CÔNG</p>
+            <h3 id="totalCount" class="text-4xl font-black mt-1">0</h3>
+          </div>
+          <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+        </div>
+
+        <!-- Khối Cấu Hình Trình Chiếu -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 class="font-bold text-slate-900 flex items-center gap-2">
             <i class="fa-solid fa-sliders text-indigo-600"></i> Cấu Hình Trình Chiếu
@@ -41,37 +42,37 @@
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">TÊN MÔN HỌC / BUỔI HỌC</label>
             <input type="text" id="sessionName" value="Sinh Hoạt Công Dân-1" 
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500">
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">ĐỊA CHỈ TRUY CẬP (DOMAIN / IP)</label>
             <div class="flex gap-2">
               <input type="text" id="customHost" 
-                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-indigo-500">
-              <button onclick="applyHost()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold">Lưu</button>
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <button onclick="applyHost()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold cursor-pointer">Lưu</button>
             </div>
-            <p class="text-[11px] text-slate-400 mt-1">Tự động nhận diện Render / Cloudflare / Ngrok hoặc IP LAN.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Tự động nhận diện domain Render / Cloudflare hoặc IP LAN.</p>
           </div>
 
-          <!-- Đổi mã QR 2s - 5s - 15s - 20s -->
+          <!-- Đổi mã QR: 2s - 5s - 15s - 20s -->
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-semibold text-slate-600">CHU KỲ ĐỔI MÃ QR</label>
               <span id="intervalBadge" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">5s</span>
             </div>
             <div class="grid grid-cols-4 gap-2">
-              <button onclick="setIntervalSec(2)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400">2s</button>
-              <button onclick="setIntervalSec(5)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border-2 border-indigo-600 bg-indigo-50 text-indigo-700">5s</button>
-              <button onclick="setIntervalSec(15)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400">15s</button>
-              <button onclick="setIntervalSec(20)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400">20s</button>
+              <button onclick="setIntervalSec(2)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400 cursor-pointer">2s</button>
+              <button onclick="setIntervalSec(5)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border-2 border-indigo-600 bg-indigo-50 text-indigo-700 cursor-pointer">5s</button>
+              <button onclick="setIntervalSec(15)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400 cursor-pointer">15s</button>
+              <button onclick="setIntervalSec(20)" class="time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400 cursor-pointer">20s</button>
             </div>
             <p class="text-[11px] text-emerald-600 font-medium mt-1">
               <i class="fa-solid fa-circle-check mr-1"></i>Mỗi Token sau khi quét vẫn có hiệu lực <strong>60 giây</strong>.
             </p>
           </div>
 
-          <!-- Độ phức tạp của QR (Mật độ điểm ảnh) -->
+          <!-- ĐỘ PHỨC TẠP CỦA QR (MẬT ĐỘ Ô) -->
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-semibold text-slate-600">ĐỘ PHỨC TẠP QR (MẬT ĐỘ Ô)</label>
@@ -87,7 +88,7 @@
             </div>
           </div>
 
-          <!-- Kích thước hiển thị khung hình -->
+          <!-- KÍCH THƯỚC KHUNG HÌNH (PX) -->
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-semibold text-slate-600">KÍCH THƯỚC KHUNG HÌNH (PX)</label>
@@ -98,30 +99,20 @@
           </div>
 
           <div class="pt-2 flex gap-2">
-            <button id="pauseBtn" onclick="togglePause()" class="flex-1 py-2 rounded-xl border border-slate-300 text-xs font-semibold hover:bg-slate-50">
+            <button id="pauseBtn" onclick="togglePause()" class="flex-1 py-2 rounded-xl border border-slate-300 text-xs font-semibold hover:bg-slate-50 cursor-pointer">
               <i class="fa-solid fa-pause mr-1"></i> Tạm dừng
             </button>
-            <button onclick="refreshQrNow()" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700">
+            <button onclick="refreshQrNow()" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 cursor-pointer">
               <i class="fa-solid fa-rotate mr-1"></i> Đổi mã ngay
             </button>
           </div>
         </div>
 
-        <!-- Thẻ thống kê tổng số lượng -->
-        <div class="bg-indigo-600 text-white p-5 rounded-2xl shadow-md flex items-center justify-between">
-          <div>
-            <p class="text-xs text-indigo-200 font-medium">ĐÃ ĐIỂM DANH THÀNH CÔNG</p>
-            <h3 id="totalCount" class="text-4xl font-black mt-1">0</h3>
-          </div>
-          <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl">
-            <i class="fa-solid fa-user-check"></i>
-          </div>
-        </div>
       </div>
 
-      <!-- Cột phải: Màn hình chiếu QR & Danh sách -->
-      <div class="lg:col-span-8 space-y-6">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center text-center">
+      <!-- Cột 2: Trình Chiếu QR Code (Ở Giữa) -->
+      <div class="lg:col-span-4 xl:col-span-5">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center text-center h-full">
           <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold mb-2">
             <i class="fa-solid fa-camera"></i> HƯỚNG CAMERA ĐIỆN THOẠI ĐỂ ĐIỂM DANH
           </div>
@@ -133,39 +124,32 @@
 
           <div class="p-6 bg-white rounded-3xl border border-slate-200 shadow-xl flex flex-col items-center">
             <div id="qrcodeBox" class="bg-white p-2 flex items-center justify-center"></div>
-            <div class="mt-4 flex flex-col items-center gap-1">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                  Token: <strong id="tokenLabel">--</strong>
-                </span>
-                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                  Hạn Token: 60s
-                </span>
-              </div>
+            <div class="mt-2 flex flex-col items-center gap-1">
               <p id="urlPreview" class="text-[11px] font-mono text-slate-400 break-all max-w-sm mt-1"></p>
             </div>
           </div>
-
-          <div class="mt-4 flex items-center gap-4 text-xs text-slate-500 font-medium">
-            <span><i class="fa-regular fa-clock mr-1"></i> QR đổi sau: <strong id="timeRemain" class="text-indigo-600">5s</strong></span>
-            <span>•</span>
-            <span class="text-emerald-600 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i> Chống chụp ảnh gửi ngoài</span>
-          </div>
         </div>
+      </div>
 
-        <!-- Bảng danh sách vừa điểm danh -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-list-check text-indigo-600"></i> Danh Sách Vừa Điểm Danh
-          </h3>
-          <div class="overflow-x-auto max-h-60 overflow-y-auto">
+      <!-- Cột 3: Danh Sách Vừa Điểm Danh (NẰM BÊN PHẢI QR CODE) -->
+      <div class="lg:col-span-4 xl:col-span-4">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full min-h-[560px]">
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-indigo-600"></i> Danh Sách Vừa Điểm Danh
+            </h3>
+            <button id="exportBtn" onclick="exportCSV()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-download"></i> <span>Xuất Excel</span>
+            </button>
+          </div>
+          <div class="overflow-x-auto flex-1 overflow-y-auto max-h-[580px]">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 text-slate-500 sticky top-0 border-b border-slate-200">
                 <tr>
-                  <th class="py-2 px-3">Thời gian</th>
-                  <th class="py-2 px-3">Mã SV</th>
-                  <th class="py-2 px-3">Họ và Tên</th>
-                  <th class="py-2 px-3">Lớp / Phòng</th>
+                  <th class="py-2.5 px-3">Thời gian</th>
+                  <th class="py-2.5 px-3">Mã SV</th>
+                  <th class="py-2.5 px-3">Họ và Tên</th>
+                  <th class="py-2.5 px-3">Lớp / Phòng</th>
                 </tr>
               </thead>
               <tbody id="attendanceTbody" class="divide-y divide-slate-100">
@@ -177,6 +161,12 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- Toast Notification System (Thay thế toàn bộ lệnh alert) -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none toast-anim flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold max-w-sm">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-base"></i>
+    <span id="toastMsg">Thông báo</span>
   </div>
 
   <script>
@@ -198,7 +188,7 @@
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. Tự động lấy domain từ thanh địa chỉ (đặc biệt khi chạy trên Render/Cloudflare)
+      // Tự động nhận diện host đang chạy
       if (window.location.host && !window.location.host.includes('localhost') && !window.location.host.includes('127.0.0.1')) {
         currentHost = window.location.host;
       } else {
@@ -217,17 +207,18 @@
       });
 
       refreshQrNow();
-      initRealtime();
+      initSSE();
+      loadAttendanceFromAPI();
     });
 
-    // Lấy Token mới từ server
     async function refreshQrNow() {
       try {
         const res = await fetch('/api/token?duration=60');
         const data = await res.json();
         if (data.token) {
           currentToken = data.token;
-          document.getElementById('tokenLabel').textContent = currentToken;
+          const tokenLbl = document.getElementById('tokenLabel');
+          if (tokenLbl) tokenLbl.textContent = currentToken;
           renderQR();
           startTimer();
         }
@@ -236,7 +227,6 @@
       }
     }
 
-    // Vẽ mã QR ra màn hình
     function renderQR() {
       const box = document.getElementById('qrcodeBox');
       box.innerHTML = '';
@@ -262,7 +252,6 @@
       });
     }
 
-    // Đếm ngược chu kỳ đổi QR
     function startTimer() {
       clearInterval(timer);
       secondsLeft = intervalSec;
@@ -278,27 +267,30 @@
     }
 
     function updateUI() {
-      document.getElementById('timeRemain').textContent = `${secondsLeft}s`;
+      const timeRemainEl = document.getElementById('timeRemain');
+      if (timeRemainEl) timeRemainEl.textContent = `${secondsLeft}s`;
       const pct = (secondsLeft / intervalSec) * 100;
       const bar = document.getElementById('countdownBar');
-      bar.style.width = `${pct}%`;
-      bar.className = pct < 30 ? 'h-full bg-rose-500 transition-all duration-300' : 'h-full bg-indigo-600 transition-all duration-300';
+      if (bar) {
+        bar.style.width = `${pct}%`;
+        bar.className = pct < 30 ? 'h-full bg-rose-500 transition-all duration-300' : 'h-full bg-indigo-600 transition-all duration-300';
+      }
     }
 
     function setIntervalSec(s) {
       intervalSec = s;
       document.getElementById('intervalBadge').textContent = `${s}s`;
       document.querySelectorAll('.time-btn').forEach(btn => {
-        btn.className = 'time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400';
+        btn.className = 'time-btn py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:border-indigo-400 cursor-pointer';
       });
-      event.target.className = 'time-btn py-1.5 text-xs font-semibold rounded-lg border-2 border-indigo-600 bg-indigo-50 text-indigo-700';
+      event.target.className = 'time-btn py-1.5 text-xs font-semibold rounded-lg border-2 border-indigo-600 bg-indigo-50 text-indigo-700 cursor-pointer';
       refreshQrNow();
     }
 
     function changeComplexity(val) {
       complexityLevel = parseInt(val);
       const labels = {
-        1: 'Thấp (Ô To - Dễ Quét)',
+        1: 'Rất thưa (Ô to - Dễ Quét)',
         2: 'Vừa phải',
         3: 'Dày đặc',
         4: 'Rất dày (Mật độ cao)'
@@ -318,7 +310,7 @@
       if (val) {
         currentHost = val.replace(/^https?:\/\//, '');
         renderQR();
-        alert('Đã cập nhật Domain/Host mới!');
+        showToast('Đã cập nhật host thành công!', 'success');
       }
     }
 
@@ -326,32 +318,33 @@
       isPaused = !isPaused;
       const btn = document.getElementById('pauseBtn');
       btn.innerHTML = isPaused ? '<i class="fa-solid fa-play mr-1"></i> Tiếp tục' : '<i class="fa-solid fa-pause mr-1"></i> Tạm dừng';
+      showToast(isPaused ? 'Đã tạm dừng đổi mã QR' : 'Đã tiếp tục tạo mã QR', 'info');
     }
 
-    // Đồng bộ danh sách Realtime (SSE + Polling dự phòng)
-    function initRealtime() {
-      // 1. Kênh SSE
-      try {
-        const evt = new EventSource('/api/events');
-        evt.onmessage = (e) => {
-          try {
-            records = JSON.parse(e.data);
-            updateAttendanceUI(records);
-          } catch (err) {}
-        };
-      } catch (e) {}
-
-      // 2. Kênh Polling dự phòng mỗi 3 giây (đảm bảo không bị nghẽn buffer trên Render/Cloudflare)
-      setInterval(async () => {
+    function initSSE() {
+      const evt = new EventSource('/api/events');
+      evt.onmessage = (e) => {
         try {
-          const res = await fetch('/api/list');
-          if (res.ok) {
-            const data = await res.json();
-            records = data;
-            updateAttendanceUI(records);
-          }
-        } catch (e) {}
-      }, 3000);
+          records = JSON.parse(e.data);
+          updateAttendanceUI(records);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      // Tự động kéo qua /api/list mỗi 2.5 giây dự phòng khi mạng chặn SSE
+      setInterval(loadAttendanceFromAPI, 2500);
+    }
+
+    async function loadAttendanceFromAPI() {
+      try {
+        const res = await fetch('/api/list');
+        if (res.ok) {
+          const data = await res.json();
+          records = data;
+          updateAttendanceUI(records);
+        }
+      } catch (e) {}
     }
 
     function updateAttendanceUI(recordsList) {
@@ -371,54 +364,88 @@
       `).join('');
     }
 
-    // XUẤT FILE EXCEL / CSV CHUẨN UTF-8 (KÉO DỮ LIỆU TỰ ĐỘNG TỪ SERVER)
+    // XUẤT EXCEL CHUẨN XÁC: Luôn kéo trực tiếp dữ liệu tươi mới từ server, không dùng alert
     async function exportCSV() {
       const btn = document.getElementById('exportBtn');
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang tải...</span>';
+      const originalHtml = btn ? btn.innerHTML : '<i class="fa-solid fa-download"></i> <span>Xuất Excel</span>';
+      if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-emerald-400"></i> <span>Đang xuất...</span>';
+        btn.disabled = true;
+      }
 
       try {
-        // Luôn kéo dữ liệu tươi mới nhất từ endpoint /api/list
         const res = await fetch('/api/list');
-        if (!res.ok) throw new Error('Không thể kết nối đến máy chủ');
+        if (!res.ok) throw new Error('Không thể kết nối đến máy chủ.');
         const data = await res.json();
 
         if (!data || data.length === 0) {
-          alert('Chưa có dữ liệu sinh viên nào điểm danh để xuất file!');
-          btn.innerHTML = originalHTML;
+          showToast('Chưa có lượt sinh viên nào điểm danh để xuất file!', 'warning');
           return;
         }
 
         const sessionTitle = document.getElementById('sessionName').value.trim() || 'DiemDanh';
-
-        // Thêm Byte Order Mark (\uFEFF) để Excel hiển thị đúng tiếng Việt có dấu
+        // \uFEFF là UTF-8 BOM đảm bảo Microsoft Excel không bị lỗi font tiếng Việt
         let csvContent = "\uFEFFSTT,Mã Sinh Viên,Họ và Tên,Lớp / Phòng,Thời Gian Điểm Danh\n";
 
         data.forEach((r, idx) => {
           const time = r.timestamp ? new Date(r.timestamp).toLocaleString('vi-VN') : '';
-          const mssv = (r.studentId || '').replace(/"/g, '""');
-          const name = (r.fullName || '').replace(/"/g, '""');
-          const className = (r.className || '').replace(/"/g, '""');
-          csvContent += `${idx + 1},"${mssv}","${name}","${className}","${time}"\n`;
+          const sid = `"${(r.studentId || '').replace(/"/g, '""')}"`;
+          const name = `"${(r.fullName || '').replace(/"/g, '""')}"`;
+          const cName = `"${(r.className || '').replace(/"/g, '""')}"`;
+          csvContent += `${idx + 1},${sid},${name},${cName},"${time}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-
+        const link = document.createElement("a");
+        
         const dateStr = new Date().toISOString().slice(0, 10);
         link.href = downloadUrl;
-        link.download = `${sessionTitle}_${dateStr}.csv`;
-
+        link.download = `${sessionTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.csv`;
+        
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(downloadUrl);
+
+        showToast(`Đã xuất thành công ${data.length} lượt điểm danh!`, 'success');
       } catch (err) {
-        alert('Lỗi xuất file: ' + err.message);
+        showToast('Lỗi xuất file: ' + err.message, 'error');
       } finally {
-        btn.innerHTML = originalHTML;
+        if (btn) {
+          btn.innerHTML = originalHtml;
+          btn.disabled = false;
+        }
       }
+    }
+
+    // Toast UI
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const text = document.getElementById('toastMsg');
+      
+      text.textContent = msg;
+
+      if (type === 'success') {
+        toast.className = 'fixed bottom-5 right-5 z-50 toast-anim flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold max-w-sm bg-emerald-50 text-emerald-800 border-emerald-200';
+        icon.className = 'fa-solid fa-circle-check text-emerald-600 text-base';
+      } else if (type === 'warning') {
+        toast.className = 'fixed bottom-5 right-5 z-50 toast-anim flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold max-w-sm bg-amber-50 text-amber-800 border-amber-200';
+        icon.className = 'fa-solid fa-triangle-exclamation text-amber-600 text-base';
+      } else if (type === 'error') {
+        toast.className = 'fixed bottom-5 right-5 z-50 toast-anim flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold max-w-sm bg-rose-50 text-rose-800 border-rose-200';
+        icon.className = 'fa-solid fa-circle-xmark text-rose-600 text-base';
+      } else {
+        toast.className = 'fixed bottom-5 right-5 z-50 toast-anim flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold max-w-sm bg-slate-900 text-white border-slate-800';
+        icon.className = 'fa-solid fa-circle-info text-indigo-400 text-base';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
     }
   </script>
 </body>
