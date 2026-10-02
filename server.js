@@ -88,6 +88,10 @@ const server = http.createServer((req, res) => {
           return res.end(JSON.stringify({ success: false, message: 'Mã QR đã hết hạn! Vui lòng quét mã mới trên màn chiếu.' }));
         }
 
+        // Trích xuất địa chỉ IP của Client
+        const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        payload.clientIp = rawIp.split(',')[0].trim();
+
         const result = storage.addRecord(payload);
         if (!result.success) {
           res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -105,7 +109,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // === BƯỚC 3 ĐẶT TẠI ĐÂY: API lấy trực tiếp danh sách điểm danh ===
+  // 7. API lấy trực tiếp danh sách điểm danh
   if (pathname === '/api/list') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify(storage.getAll()));

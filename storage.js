@@ -65,11 +65,26 @@ class Storage {
 
   addRecord(record) {
     const list = this.getAll();
-    const isExisted = list.some(
+
+    // 1. Chặn trùng mã sinh viên
+    const isStudentExisted = list.some(
       item => item.studentId.trim().toLowerCase() === record.studentId.trim().toLowerCase()
     );
-    if (isExisted) {
-      return { success: false, message: 'Mã SV này đã điểm danh trước đó!' };
+    if (isStudentExisted) {
+      return { success: false, message: 'Mã SV này đã được điểm danh trước đó!' };
+    }
+
+    // 2. Chặn gian lận: 1 thiết bị điểm danh cho 2 sinh viên khác nhau
+    if (record.deviceId) {
+      const isDeviceExisted = list.some(
+        item => item.deviceId && item.deviceId === record.deviceId
+      );
+      if (isDeviceExisted) {
+        return { 
+          success: false, 
+          message: 'Cảnh báo: Thiết bị này đã được sử dụng để điểm danh cho một sinh viên khác!' 
+        };
+      }
     }
 
     const newEntry = {
@@ -77,6 +92,8 @@ class Storage {
       studentId: record.studentId.trim(),
       fullName: record.fullName.trim(),
       className: record.className.trim(),
+      deviceId: record.deviceId || null,
+      clientIp: record.clientIp || null,
       timestamp: new Date().toISOString()
     };
 
